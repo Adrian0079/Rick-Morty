@@ -1,0 +1,28 @@
+--- 
+// El bloque de código entre los guiones es el frontmatter de Astro, donde se pueden definir variables, importar componentes y realizar otras configuraciones para la página. En este caso, se importa el componente MainLayout.astro desde la carpeta layouts. El frontmatter se encuentra al inicio del archivo y está delimitado por tres guiones (---) al principio y al final.
+
+import '../styles/global.css'; // Importa un archivo CSS global para aplicar estilos a toda la aplicación.
+
+interface Props { 
+	title: string; // Define una interfaz Props que especifica que el componente MainLayout espera recibir una propiedad title de tipo string.
+}
+
+const {title} = Astro.props as Props;
+
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main class="container">
+			<slot /> {/* El componente MainLayout utiliza un slot para renderizar el contenido que se le pase desde la página index.astro. Esto permite que el contenido de la página se inserte dentro del diseño definido por MainLayout. */}	
+		</main>
+	</body>
+</html>
+

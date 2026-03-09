@@ -1,11 +1,58 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import MainLayout from '../layouts/MainLayout.astro';
+import CardCh  from '../components/CardCh.astro';
+import { getCharacters } from '../lib/api_RM';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const data = await getCharacters(1); //Respuesta completa de la API
+const characters = data.results; //solo los personajes
+
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<MainLayout title='Rick y Morty!'>
+	<section class="hero">
+  		<!-- <p class="eyebrow"></p> -->
+  		<h1>Rick y Morty | Explorador</h1>
+  		<p class="subtitle">
+    		Rick y Morty | Personajes 
+  		</p>
+		<section class="grid">
+  			{characters.map((character) => (
+    		<CardCh character={character} />
+  			))}
+		</section>
+	</section>
+</MainLayout>
+
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 2rem 0 2.5rem;
+  }
+
+  .eyebrow {
+    color: #86efac;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.3rem);
+    margin: 0;
+  }
+
+  .subtitle {
+    max-width: 700px;
+    margin: 1rem auto 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+  }
+</style>
