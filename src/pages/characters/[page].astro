@@ -1,0 +1,99 @@
+---
+import CardCh from "../../components/CardCh.astro";
+import MainLayout from "../../layouts/MainLayout.astro";
+import { getCharacters } from "../../lib/api_RM";
+import type { GetStaticPaths } from "astro";
+
+
+
+
+export const getStaticPaths = (async () => {
+    const firstPage = await getCharacters(1);
+    const totalPages = firstPage.info.pages;
+
+//Genereamos las rutas para cada página de personajes
+    return Array.from({ length: totalPages }, (_, index) => ({
+    params: { page: String(index + 1) }
+    }));
+}) satisfies GetStaticPaths;
+
+//Leemos el numero de la pagina desde el enalce
+const currentPage = Number(Astro.params.page);
+
+//pedimos esa pagina a la API
+const data = await getCharacters(currentPage);
+const characters = data.results;
+
+const title=`Rick and Morty | Página ${currentPage}`;
+const totalPages = data.info.pages;
+---
+
+<MainLayout title={title}>
+    <section class="hero">
+        <h1>Listado de personajes</h1>
+        <p class="subtitle">Página {currentPage} de {totalPages}</p>
+    </section>
+
+    <section class="grid">
+        {characters.map((character) => (
+        <CardCh character={character} />
+    ))}
+    </section>
+
+    <nav class="pagination" aria-label="Paginación">
+        {currentPage > 1 ? (
+        <a href={`/characters/${currentPage - 1}`} class="button">
+        ← Anterior
+        </a>
+    ) : (
+    <span class="button disabled">← Anterior</span>
+    )}
+
+    {currentPage < totalPages ? (
+    <a href={`/characters/${currentPage + 1}`} class="button">
+        Siguiente →
+    </a>
+    ) : (
+    <span class="button disabled">Siguiente →</span>
+    )}
+    </nav>
+</MainLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    background: #22c55e;
+    color: #04130a;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>

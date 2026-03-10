@@ -29,3 +29,5 @@ export interface CharacterApiResponse {
   info: ApiInformation;
   results: Character[];
 }
+
+

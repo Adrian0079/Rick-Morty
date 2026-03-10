@@ -2,24 +2,39 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import CardCh  from '../components/CardCh.astro';
 import { getCharacters } from '../lib/api_RM';
+import Navbar from '../components/Navbar.astro';
 
-const data = await getCharacters(1); //Respuesta completa de la API
+const currentPage = 1; //Página que queremos mostrar
+const data = await getCharacters(currentPage); //Respuesta completa de la API
 const characters = data.results; //solo los personajes
+const totalPages = data.info.pages; //total de páginas disponibles
 
 ---
 
 <MainLayout title='Rick y Morty!'>
+  <Navbar />
 	<section class="hero">
   		<!-- <p class="eyebrow"></p> -->
   		<h1>Rick y Morty | Explorador</h1>
-  		<p class="subtitle">
-    		Rick y Morty | Personajes 
+  		<p class="subtitle">p
+    		Rick y Morty | Personajes | Pagina {currentPage} de {totalPages}
   		</p>
 		<section class="grid">
   			{characters.map((character) => (
     		<CardCh character={character} />
   			))}
 		</section>
+    <nav class="pagination" aria-label="Paginación">
+      <span class="button disabled">← Anterior</span>
+      
+      {currentPage < totalPages && (
+        <a href="/characters/2" class="button">
+          Siguiente →
+        </a>
+      )}
+
+      </span>
+    </nav>
 	</section>
 </MainLayout>
 
@@ -55,4 +70,25 @@ const characters = data.results; //solo los personajes
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.2rem;
   }
+  .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  background: #22c55e;
+  color: #04130a;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 </style>

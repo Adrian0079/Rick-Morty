@@ -1,0 +1,29 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import type { GetStaticPaths } from "astro"; 
+import type { Character } from "../../interfaces/rick-and-morty"
+
+const { id } = Astro.params;
+
+const response = await fetch(`https://rickandmortyapi.com/api/character/${id}`);
+const character = await response.json() as Character;
+
+
+export const getStaticPaths = (() => {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+  ];
+}) satisfies GetStaticPaths;
+
+---
+<MainLayout title={character.name}>
+    <h1>{character.name}</h1>
+    <div>
+      <a href="/">Regresar</a>
+      <img src={character.image} alt={character.name} />
+      <p>{character.species}</p>
+      <p>{character.status}</p>
+    </div>
+</MainLayout>

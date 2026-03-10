@@ -9,6 +9,7 @@ export async function getCharacters(page: number = 1): Promise<CharacterApiRespo
     const response = await fetch(`${urlApi}/character?page=${page}`); //Hacemos la petición a la API con el número de página
     
     if (!response.ok){
+        console.error("Error en la API:", response.status, response.statusText);
         throw new Error('No se pudo obtener la lista de personajes'); //Si la respuesta no es ok, lanzamos un error
     }
     return response.json(); //Si la respuesta es ok, devolvemos el resultado en formato JSON, que será de tipo CharacterApiResponse
@@ -29,3 +30,4 @@ export async function getAllCh(): Promise<Character[]> { //Función para obtener
     }
     return allCharacters; //Devolvemos el array completo de personajes
 }
+
