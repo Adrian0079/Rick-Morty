@@ -1,0 +1,305 @@
+---
+export const prerender = false;
+
+import MainLayout from "../layouts/MainLayout.astro";
+import { turso } from "../lib/turso";
+
+type Season = {
+  NumT: number;
+  Appear: number;
+  Power: string;
+  name: string;
+};
+
+const result = await turso.execute(
+  "SELECT NumT, Appear, Power, name FROM Seasons ORDER BY NumT ASC"
+);
+
+const seasons: Season[] = result.rows.map((row) => ({
+  NumT: Number(row.NumT),
+  Appear: Number(row.Appear),
+  Power: String(row.Power ?? ""),
+  name: String(row.name ?? ""),
+}));
+---
+
+<MainLayout title="Seasons Dashboard">
+  <section class="wrapper">
+    <div class="hero">
+      <h1>Seasons Dashboard</h1>
+      <p class="subtitle">CRUD real con Astro + Turso</p>
+    </div>
+
+    <section class="panel">
+      <h2>Agregar registro</h2>
+
+      <form id="create-form" class="form">
+        <input type="number" name="NumT" placeholder="NumT" required />
+        <input type="text" name="name" placeholder="Nombre" required />
+
+        <select name="Appear" required>
+          <option value="">¿Aparece?</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+
+        <input type="text" name="Power" placeholder="Poder" required />
+
+        <button type="submit">Crear</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Lista de registros</h2>
+
+      <div class="grid">
+        {seasons.map((season) => (
+          <article class="card">
+            <div class="card__top">
+              <span class="num">#{season.NumT}</span>
+              <span class={`badge ${season.Appear ? "active" : "inactive"}`}>
+                {season.Appear ? "Aparece" : "No aparece"}
+              </span>
+            </div>
+
+            <h3>{season.name}</h3>
+            <p class="power">{season.Power}</p>
+
+            <form class="update-form" data-id={season.NumT}>
+              <input
+                type="text"
+                name="name"
+                value={season.name}
+                required
+              />
+
+              <select name="Appear" required>
+                <option value="1" selected={season.Appear === 1}>Sí</option>
+                <option value="0" selected={season.Appear === 0}>No</option>
+              </select>
+
+              <input
+                type="text"
+                name="Power"
+                value={season.Power}
+                required
+              />
+
+              <button type="submit">Actualizar</button>
+            </form>
+
+            <button class="delete-btn danger" data-id={season.NumT}>
+              Eliminar
+            </button>
+          </article>
+        ))}
+      </div>
+    </section>
+  </section>
+
+  <script>
+    const createForm = document.querySelector("#create-form");
+
+    createForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const form = event.currentTarget;
+      if (!(form instanceof HTMLFormElement)) return;
+
+      const formData = new FormData(form);
+
+      const payload = {
+        NumT: Number(formData.get("NumT")),
+        name: String(formData.get("name")),
+        Appear: Number(formData.get("Appear")),
+        Power: String(formData.get("Power")),
+      };
+
+      const response = await fetch("/api/seasons", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert(result.error || "No se pudo crear el registro");
+      }
+    });
+
+    const updateForms = document.querySelectorAll(".update-form");
+
+    updateForms.forEach((form) => {
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const currentForm = event.currentTarget;
+        if (!(currentForm instanceof HTMLFormElement)) return;
+
+        const id = currentForm.dataset.id;
+        const formData = new FormData(currentForm);
+
+        const payload = {
+          name: String(formData.get("name")),
+          Appear: Number(formData.get("Appear")),
+          Power: String(formData.get("Power")),
+        };
+
+        const response = await fetch(`/api/seasons/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert(result.error || "No se pudo actualizar el registro");
+        }
+      });
+    });
+
+    const deleteButtons = document.querySelectorAll(".delete-btn");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        const id = button.dataset.id;
+
+        const confirmed = confirm(`¿Seguro que quieres eliminar el registro ${id}?`);
+        if (!confirmed) return;
+
+        const response = await fetch(`/api/seasons/${id}`, {
+          method: "DELETE",
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert(result.error || "No se pudo eliminar el registro");
+        }
+      });
+    });
+  </script>
+</MainLayout>
+
+<style>
+  .wrapper {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+    padding: 2rem 0 4rem;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .panel {
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form,
+  .update-form {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .form {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    align-items: end;
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 1rem;
+  }
+
+  .card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .num {
+    font-weight: bold;
+    color: #cbd5e1;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .inactive {
+    background: rgba(148, 163, 184, 0.2);
+    color: #cbd5e1;
+  }
+
+  .power {
+    color: #e5e7eb;
+    line-height: 1.5;
+  }
+
+  input,
+  select,
+  button {
+    padding: 0.75rem;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    background: #22c55e;
+    color: #04130a;
+    font-weight: bold;
+  }
+
+  .danger {
+    width: 100%;
+    margin-top: 0.8rem;
+    background: #ef4444;
+    color: white;
+  }
+</style>

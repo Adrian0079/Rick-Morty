@@ -5,9 +5,16 @@ import type {
 
 const urlApi = 'https://rickandmortyapi.com/api'; 
 
-export async function getCharacters(page: number = 1): Promise<CharacterApiResponse> { 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function getCharacters(page: number = 1, retries: number = 3): Promise<CharacterApiResponse> { 
     const response = await fetch(`${urlApi}/character?page=${page}`); //Hacemos la petición a la API con el número de página
-    
+    if (response.status === 429 && retries > 0) {
+    await sleep(1500);
+    return getCharacters(page, retries - 1);
+    }
     if (!response.ok){
         console.error("Error en la API:", response.status, response.statusText);
         throw new Error('No se pudo obtener la lista de personajes'); //Si la respuesta no es ok, lanzamos un error

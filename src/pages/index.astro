@@ -1,24 +1,29 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import CardCh  from '../components/CardCh.astro';
-import { getCharacters } from '../lib/api_RM';
-import Navbar from '../components/Navbar.astro';
+import CardCh  from '@components/CardCh.astro';
+import { getCharacters } from '@lib/api_RM';
+import Navbar from '@components/shared/Navbar.astro';
 
 const currentPage = 1; //Página que queremos mostrar
 const data = await getCharacters(currentPage); //Respuesta completa de la API
 const characters = data.results; //solo los personajes
 const totalPages = data.info.pages; //total de páginas disponibles
-
+export const prerender = false;
 ---
 
 <MainLayout title='Rick y Morty!'>
-  <Navbar />
+  
 	<section class="hero">
   		<!-- <p class="eyebrow"></p> -->
   		<h1>Rick y Morty | Explorador</h1>
-  		<p class="subtitle">p
+  		<p class="subtitle">
     		Rick y Morty | Personajes | Pagina {currentPage} de {totalPages}
   		</p>
+      <div class="actions">
+        <a href="/Seasons-Dashboard" class="dashboard-button">
+          Ir al Dashboard
+        </a>
+</div>
 		<section class="grid">
   			{characters.map((character) => (
     		<CardCh character={character} />
@@ -33,7 +38,7 @@ const totalPages = data.info.pages; //total de páginas disponibles
         </a>
       )}
 
-      </span>
+      
     </nav>
 	</section>
 </MainLayout>

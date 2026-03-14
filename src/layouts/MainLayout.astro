@@ -3,6 +3,7 @@
 
 import { ViewTransitions } from 'astro:transitions';
 import '../styles/global.css'; // Importa un archivo CSS global para aplicar estilos a toda la aplicación.
+import Navbar from '@components/shared/Navbar.astro';
 
 interface Props { 
 	title: string; // Define una interfaz Props que especifica que el componente MainLayout espera recibir una propiedad title de tipo string.
@@ -22,6 +23,7 @@ const {title} = Astro.props as Props;
 		<ViewTransitions />
 	</head>
 	<body>
+		<Navbar /> {/* El componente Navbar se renderiza en todas las páginas que utilizan MainLayout, proporcionando una barra de navegación consistente en toda la aplicación. */}
 		<main class="container">
 			<slot /> {/* El componente MainLayout utiliza un slot para renderizar el contenido que se le pase desde la página index.astro. Esto permite que el contenido de la página se inserte dentro del diseño definido por MainLayout. */}	
 		</main>

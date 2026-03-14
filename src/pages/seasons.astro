@@ -1,0 +1,137 @@
+---
+import MainLayout from "@layouts/MainLayout.astro"; 
+import db from "src/lib/sqlite";
+
+type Season = {
+    NumT: number;
+    Appear: number;
+    Power: string;
+    name: string;
+};
+
+const seasons = db
+    .prepare(`SELECT NumT, Appear, Power, name FROM Seasons
+    ORDER BY NumT ASC`)
+    .all() as Season[];
+
+---
+
+<MainLayout title="Seasons">
+  <section class="wrapper">
+    <div class="hero">
+      <h1>Rick and Morty Powers</h1>
+      <p class="subtitle">
+        Datos cargados desde una base SQLite externa.
+      </p>
+    </div>
+
+    <section class="grid">
+      {seasons.map((season) => (
+        <article class="card">
+          <div class="card__top">
+            <span class="num">#{season.NumT}</span>
+            <span class={`badge ${season.Appear ? "active" : "inactive"}`}>
+              {season.Appear ? "Aparece" : "No aparece"}
+            </span>
+          </div>
+
+          <h2>{season.name}</h2>
+
+          <p class="label">Poder</p>
+          <p class="power">{season.Power}</p>
+        </article>
+      ))}
+    </section>
+  </section>
+</MainLayout>
+
+<style>
+  .wrapper {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+    padding: 2rem 0 4rem;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .num {
+    font-weight: bold;
+    color: #cbd5e1;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .inactive {
+    background: rgba(148, 163, 184, 0.2);
+    color: #cbd5e1;
+  }
+
+  h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.2rem;
+  }
+
+  .label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 0.3rem;
+  }
+
+  .power {
+    margin: 0;
+    color: #e5e7eb;
+    line-height: 1.6;
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+import MainLayout from "@layouts/MainLayout.astro";
+import db from "../lib/sqlite";
+
+const tableName = "Seasons";
+
+type ColumnInfo = {
+  name: string;
+  type: string;
+  notnull: number;
+  dflt_value: any;
+  pk: number;
+  cid: number;
+};
+
+const columns = db
+    .prepare(`PRAGMA table_info(${tableName})`)
+    .all() as ColumnInfo[];
+
+const rows = db
+    .prepare(`SELECT * FROM ${tableName} LIMIT 5`)
+    .all() as Record<string, any>[];
+
+---
+
+<MainLayout title="Seasons Preview">
+  <section style="width:min(1100px,92%);margin:2rem auto;">
+    <h1>Tabla: {tableName}</h1>
+
+    <h2>Columnas</h2>
+    <ul>
+      {columns.map((col) => (
+        <li>
+          {col.name} | {col.type || "sin tipo visible"} | {col.pk ? "PK" : "No PK"}
+        </li>
+      ))}
+    </ul>
+
+    <h2>Registros</h2>
+    <pre>{JSON.stringify(rows, null, 2)}</pre>
+  </section>
+</MainLayout>

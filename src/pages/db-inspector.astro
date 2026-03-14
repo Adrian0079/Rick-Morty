@@ -1,0 +1,31 @@
+---
+import MainLayout from "@layouts/MainLayout.astro";
+import db from "../lib/sqlite";
+
+
+type TableRow = {
+    name: string;
+}
+
+const tables = db
+    .prepare(`
+        SELECT name
+        FROM sqlite_master
+        WHERE type='table' 
+        AND name NOT LIKE 'sqlite_%'
+        ORDER BY name`
+    ).all() as TableRow[];
+
+---
+
+<MainLayout title="DB Inspector">
+  <section style="width:min(900px,92%);margin:2rem auto;">
+    <h1>Tablas de la base SQLite</h1>
+
+    <ul>
+      {tables.map((table) => (
+        <li>{table.name}</li>
+      ))}
+    </ul>
+  </section>
+</MainLayout>
